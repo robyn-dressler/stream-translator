@@ -1,0 +1,12 @@
+[project]
+name = "emmy-speech-translator"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = [
+    "libretranslate>=1.9.6",
+    "openai-whisper>=20250625",
+    "pyaudio>=0.2.14",
+    "soundfile>=0.14.0",
+    "speechrecognition>=3.17.0",
+    "translate>=3.8.1",
+]
