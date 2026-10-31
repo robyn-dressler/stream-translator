@@ -1,7 +1,5 @@
 import asyncio
 import logging
-from threading import Thread
-from types import TracebackType
 from typing import override
 
 import twitchio

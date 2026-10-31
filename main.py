@@ -11,17 +11,21 @@ from translation_file_service import TranslationFileService
 async def transcribe():
     r = sr.Recognizer()
 
-    with sr.Microphone() as source, TranslationFileService() as translation_file_service:
-        while True:
-            audio = await asyncio.to_thread(lambda: r.listen(source))
-            try:
-                english_text = await asyncio.to_thread(lambda: r.recognize_whisper(audio, language="english"))
-                await translation_file_service.process_text(english_text)
+    with sr.Microphone() as source:
+        async with TranslationFileService() as translation_file_service:
+            while True:
+                audio = await asyncio.to_thread(lambda: r.listen(source))
+                try:
+                    english_text = await asyncio.to_thread(lambda: r.recognize_whisper(audio, language="english"))
+                    if not english_text:
+                        continue
 
-            except sr.UnknownValueError:
-                logging.error("Whisper could not understand audio")
-            except sr.RequestError as e:
-                logging.error(f"Could not request results from Whisper; {e}")
+                    await translation_file_service.process_text(english_text)
+
+                except sr.UnknownValueError:
+                    logging.error("Whisper could not understand audio")
+                except sr.RequestError as e:
+                    logging.error(f"Could not request results from Whisper; {e}")
 
 async def main():
     logging.getLogger().setLevel(logging.INFO)
