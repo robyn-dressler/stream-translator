@@ -73,8 +73,8 @@ class TranslationFileService:
         self.ja_file = open("japanese.txt", "w")
 
         with ExitStack() as stack:
-            stack.enter_context(cast(TextIOWrapper, self.en_file))
-            stack.enter_context(cast(TextIOWrapper, self.ja_file))
+            stack.enter_context(self.en_file)
+            stack.enter_context(self.ja_file)
             self._stack = stack.pop_all()
 
         self.writer_task = asyncio.create_task(self.writer.run())
