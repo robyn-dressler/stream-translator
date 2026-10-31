@@ -6,7 +6,9 @@ dependencies = [
     "libretranslate>=1.9.6",
     "openai-whisper>=20250625",
     "pyaudio>=0.2.14",
+    "requests>=2.31.0",
     "soundfile>=0.14.0",
     "speechrecognition>=3.17.0",
     "translate>=3.8.1",
+    "twitchio>=3.3.2",
 ]

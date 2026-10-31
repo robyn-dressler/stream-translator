@@ -1,0 +1,5 @@
+twitch_client_id = ""
+twitch_client_secret = ""
+twitch_bot_id = ""
+twitch_owner_id = ""
+twitch_bot_prefix = "!"
