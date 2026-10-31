@@ -31,7 +31,7 @@ class LibreTranslateThread(Thread):
         logging.info("Starting LibreTranslate...")
 
         self.libre_process = run_command(
-            ["libretranslate", "--update-models"],
+            ["libretranslate"],
             error_message="Failed to start LibreTranslate"
         )
 
