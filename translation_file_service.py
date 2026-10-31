@@ -69,8 +69,8 @@ class TranslationFileService:
 
     async def __aenter__(self):
         self.writer = TranslationFileWriter()
-        self.en_file = open("english.txt", "w")
-        self.ja_file = open("japanese.txt", "w")
+        self.en_file = open("english.txt", "w", encoding="utf-8")
+        self.ja_file = open("japanese.txt", "w", encoding="utf-8")
 
         with ExitStack() as stack:
             stack.enter_context(self.en_file)
