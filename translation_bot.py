@@ -55,11 +55,11 @@ async def start_bot():
     twitchio.utils.setup_logging(level=logging.INFO)
 
     async with TranslationBot(
-            client_id=config.twitch_client_id,
-            client_secret=config.twitch_client_secret,
-            bot_id=config.twitch_bot_id,
-            owner_id=config.twitch_owner_id,
-            prefix=config.twitch_bot_prefix
+        client_id=config.twitch_client_id,
+        client_secret=config.twitch_client_secret,
+        bot_id=config.twitch_bot_id,
+        owner_id=config.twitch_owner_id,
+        prefix=config.twitch_bot_prefix
     ) as bot:
         await bot.add_component(CommandComponent(bot))
         await bot.start()

@@ -34,7 +34,7 @@ async def main():
         translation_service.start()
         transcribe_task = asyncio.create_task(transcribe())
         bot_task = asyncio.create_task(start_bot())
-        await asyncio.gather(bot_task, transcribe_task)
+        await asyncio.gather(bot_task, transcribe_task, return_exceptions=True)
 
 if __name__ == '__main__':
     asyncio.run(main())
