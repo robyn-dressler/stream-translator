@@ -1,2 +1,2 @@
 uv sync
-python main.py
+uv run main.py
