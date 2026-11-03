@@ -1,9 +1,12 @@
 import asyncio
 import webbrowser
 from asyncio import TaskGroup
+from pathlib import Path
 from typing import override
+from urllib.request import urlretrieve
 
 import twitchio
+import libretranslate.init as init
 from argostranslate import package
 from twitchio import Scopes, UserAuthorisation
 from twitchio.authentication import UserTokenPayload
@@ -71,7 +74,7 @@ class SetupService:
             await self.twitch_client.wait_until_ready()
             configured_ids = config.twitch_broadcaster_ids + [config.twitch_bot_id]
             user_authorizations = await self.twitch_client.fetch_auth_by_users(configured_ids)
-            user_authorization_map = {item.user.id: item for item in user_authorizations}
+            user_authorization_map = {item.user.id: item for item in user_authorizations if item.user.id in self.authorized_ids}
 
             # Authorize application to use configured bot user
             bot_scopes = {"user:read:chat", "user:write:chat", "user:bot"}
@@ -104,23 +107,22 @@ class SetupService:
 
     def install_translation_models(self):
         print("Installing translation models...")
+        init.check_and_install_models(update=True)
 
-        # Retrieve lists of remote and local packages
-        available = package.get_available_packages()
-        installed = {
-            (p.from_code, p.to_code): p
-            for p in package.get_installed_packages()
-        }
+       # Remove the es -> en model that is automatically installed
+        for model in package.get_installed_packages():
+            if model.from_code == "es" and model.to_code == "en":
+                print("Removing:", model.package_path, "version", model.package_version)
+                package.uninstall(model)
 
-        # Update existing packages and install new ones
-        for p in available:
-            key = (p.from_code, p.to_code)
-            if key in installed:
-                existing_package = installed[key]
-                existing_package.update()
-            else:
-                print(f"Installing {p.from_code} -> {p.to_code}")
-                p.install()
+        # Replace version 1.9 with the archived 1.0 version, since 1.9 is borked
+        old_es_en_url = "https://data.argosopentech.com/argospm/v1/translate-es_en-1_0.argosmodel"
+        model_file = Path("translate-es_en-1_0.argosmodel")
+
+        if not model_file.is_file():
+            urlretrieve(old_es_en_url, model_file)
+
+        package.install_from_path(model_file)
 
         print("Installation complete!")
 
