@@ -32,9 +32,10 @@ async def main():
 
     with LibreTranslateService() as translation_service:
         translation_service.start()
-        transcribe_task = asyncio.create_task(transcribe())
-        bot_task = asyncio.create_task(start_bot())
-        await asyncio.gather(bot_task, transcribe_task, return_exceptions=True)
+
+        async with asyncio.TaskGroup() as task_group:
+            task_group.create_task(transcribe())
+            task_group.create_task(start_bot())
 
 if __name__ == '__main__':
     asyncio.run(main())

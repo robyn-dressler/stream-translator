@@ -9,12 +9,18 @@ from twitchio.ext.commands import Bot
 
 import config
 from translation_client import TranslationClient
+from util import get_authorized_users
 
 
 class TranslationBot(Bot):
     @override
     async def setup_hook(self):
+        authorized_ids = get_authorized_users()
         for broadcaster_id in config.twitch_broadcaster_ids:
+            if broadcaster_id not in authorized_ids:
+                logging.warning(f"Broadcaster id '{broadcaster_id}' not authorized. Skipping.")
+                continue
+
             await self.subscribe_websocket(
                 payload=ChatMessageSubscription(
                     broadcaster_user_id=broadcaster_id,

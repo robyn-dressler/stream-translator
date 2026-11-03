@@ -1,3 +1,1 @@
-uv sync
-uv run install_translation_models.py
-uv run main.py
+uv sync && uv run setup.py && uv run main.py
