@@ -2,6 +2,7 @@ import asyncio
 import logging
 
 import speech_recognition as sr
+import torch
 
 from libretranslate_service import LibreTranslateService
 from translation_bot import start_bot
@@ -29,6 +30,9 @@ async def transcribe():
 
 async def main():
     logging.getLogger().setLevel(logging.INFO)
+
+    device = "GPU" if torch.cuda.is_available() else "CPU"
+    logging.info(f"Using {device} for speech recognition")
 
     with LibreTranslateService() as translation_service:
         translation_service.start()

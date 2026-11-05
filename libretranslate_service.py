@@ -1,4 +1,5 @@
 import logging
+import os
 import subprocess
 from threading import Thread
 from time import sleep
@@ -30,9 +31,14 @@ class LibreTranslateThread(Thread):
     def run(self):
         logging.info("Starting LibreTranslate...")
 
+        # Enable cuda support, preserving existing environment variables
+        env = os.environ.copy()
+        env["ARGOS_DEVICE_TYPE"] = "auto"
+
         self.libre_process = run_command(
             ["libretranslate"],
-            error_message="Failed to start LibreTranslate"
+            error_message="Failed to start LibreTranslate",
+            env=env
         )
 
         logging.info("LibreTranslate stopped!")
