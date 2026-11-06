@@ -4,8 +4,10 @@ from asyncio import Queue
 from contextlib import ExitStack
 from dataclasses import astuple, dataclass
 from io import TextIOWrapper
-from typing import cast
 
+from langcodes import Language
+
+import config
 from translation_client import TranslationClient
 
 
@@ -13,7 +15,7 @@ from translation_client import TranslationClient
 class TranslationFileWriteRequest:
     english_text: str
     en_file: TextIOWrapper | None
-    ja_file: TextIOWrapper | None
+    translated_files: dict[str, TextIOWrapper] | None
 
     def __iter__(self):
         return iter(astuple(self))
@@ -32,19 +34,21 @@ class TranslationFileWriter:
                 break
 
             try:
-                if request.en_file is None or request.ja_file is None:
+                if request.en_file is None or request.translated_files is None:
                     return
 
                 TranslationFileWriter.overwrite_file(request.en_file, request.english_text)
                 logging.info(f"English phrase: {request.english_text}")
 
-                ja_text = TranslationClient.translate(request.english_text, from_lang="en", to_lang="ja")
-                if ja_text is not None:
-                    TranslationFileWriter.overwrite_file(request.ja_file, ja_text)
-                    logging.info(f"Japanese translation: {ja_text}")
+                for code, file in request.translated_files.items():
+                    translated_text = TranslationClient.translate(request.english_text, from_lang="en", to_lang=code)
+                    lang = Language.get(code)
+                    if translated_text is not None:
+                        TranslationFileWriter.overwrite_file(file, translated_text)
+                        logging.info(f"{lang.language_name()} translation: {translated_text}")
 
-            except Exception:
-                pass
+            except:
+                logging.exception(f"Write request failed")
             finally:
                 self._file_write_queue.task_done()
 
@@ -65,16 +69,21 @@ class TranslationFileService:
     def __init__(self):
         self.writer: TranslationFileWriter | None = None
         self.en_file: TextIOWrapper | None = None
-        self.ja_file: TextIOWrapper | None = None
+        self.translated_files: dict[str, TextIOWrapper] = {}
 
     async def __aenter__(self):
         self.writer = TranslationFileWriter()
         self.en_file = open("english.txt", "w", encoding="utf-8")
-        self.ja_file = open("japanese.txt", "w", encoding="utf-8")
+
+        self.translated_files: dict[str, TextIOWrapper] = {}
+        for language in config.translate_to_languages:
+            lang = Language.find(language)
+            self.translated_files[lang.to_tag()] = open(f"{lang.language_name().lower()}.txt", "w", encoding="utf-8")
 
         with ExitStack() as stack:
             stack.enter_context(self.en_file)
-            stack.enter_context(self.ja_file)
+            for code, file in self.translated_files.items():
+                stack.enter_context(file)
             self._stack = stack.pop_all()
 
         self.writer_task = asyncio.create_task(self.writer.run())
@@ -91,8 +100,8 @@ class TranslationFileService:
 
 
     async def process_text(self, text: str):
-        if self.writer is None or self.en_file is None or self.ja_file is None:
+        if self.writer is None or self.en_file is None or not self.translated_files:
             return
 
-        request = TranslationFileWriteRequest(english_text=text, en_file=self.en_file, ja_file=self.ja_file)
+        request = TranslationFileWriteRequest(english_text=text, en_file=self.en_file, translated_files=self.translated_files)
         await self.writer.enqueue(request)

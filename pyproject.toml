@@ -4,6 +4,8 @@ version = "0.1.0"
 requires-python = ">=3.12"
 dependencies = [
     "argostranslate>=1.11.0",
+    "langcodes>=3.5.1",
+    "language-data>=1.4.0",
     "libretranslate>=1.9.6",
     "openai-whisper>=20250625",
     "pyaudio>=0.2.14",
