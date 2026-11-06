@@ -1,18 +1,13 @@
+set extra = "cpu"
 @echo off
 where nvidia-smi >nul 2>&1
-if errorlevel 1 goto cpu
+if errorlevel 1 goto start
 
 nvidia-smi -L >nul 2>&1
-if errorlevel 1 goto cpu
+if errorlevel 1 goto start
 
-uv sync --extra cuda
-if errorlevel 1 goto :eof
-goto :start
-
-:cpu
-uv sync --extra cpu
-if errorlevel 1 goto :eof
+set extra = "cuda"
 
 :start
 @echo on
-uv run setup.py && uv run main.py
+uv sync --extra "%extra%" && uv run setup.py && uv run main.py --extra "%extra%"
