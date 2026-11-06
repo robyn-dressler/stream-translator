@@ -1,4 +1,4 @@
-set extra = "cpu"
+set extra="cpu"
 @echo off
 where nvidia-smi >nul 2>&1
 if errorlevel 1 goto start
@@ -6,7 +6,7 @@ if errorlevel 1 goto start
 nvidia-smi -L >nul 2>&1
 if errorlevel 1 goto start
 
-set extra = "cuda"
+set extra="cuda"
 
 :start
 @echo on
