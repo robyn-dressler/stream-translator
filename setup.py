@@ -79,7 +79,7 @@ class SetupService:
             await self.twitch_client.wait_until_ready()
 
             # Get list of all user ids
-            configured_logins = config.twitch_broadcaster_logins + [config.twitch_bot_login]
+            configured_logins = config.twitch_broadcaster_logins + [config.twitch_bot_login, config.twitch_owner_login]
             configured_id_map = await self.get_user_ids(configured_logins)
             configured_ids = [ v for k,v in configured_id_map.items() ]
 
