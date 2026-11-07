@@ -26,7 +26,7 @@ conflicts = [[{ extra = "cpu" }, { extra = "cuda" }]]
 [tool.uv.sources]
 torch = [
   { index = "pytorch-cpu", extra = "cpu" },
-  { index = "pytorch-cu134", extra = "cuda" },
+  { index = "pytorch-cu132", extra = "cuda" },
 ]
 
 [[tool.uv.index]]
@@ -35,6 +35,6 @@ url = "https://download.pytorch.org/whl/cpu"
 explicit = true
 
 [[tool.uv.index]]
-name = "pytorch-cu134"
-url = "https://download.pytorch.org/whl/cu134"
+name = "pytorch-cu132"
+url = "https://download.pytorch.org/whl/cu132"
 explicit = true

@@ -7,3 +7,4 @@ twitch_broadcaster_ids = [""]
 twitch_redirect_uri = "http://localhost:4343/oauth/callback"
 
 translate_to_languages = ["spanish"]
+enable_cuda = False

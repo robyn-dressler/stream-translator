@@ -12,12 +12,16 @@ from translation_file_service import TranslationFileService
 async def transcribe():
     r = sr.Recognizer()
 
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+
     with sr.Microphone() as source:
         async with TranslationFileService() as translation_file_service:
             while True:
                 audio = await asyncio.to_thread(lambda: r.listen(source))
                 try:
-                    english_text = await asyncio.to_thread(lambda: r.recognize_whisper(audio, language="english"))
+                    english_text = await asyncio.to_thread(
+                        lambda: r.recognize_whisper(audio, language="english", load_options={"device": device})
+                    )
                     if not english_text:
                         continue
 

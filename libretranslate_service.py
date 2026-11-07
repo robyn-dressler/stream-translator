@@ -31,10 +31,8 @@ class LibreTranslateThread(Thread):
     def run(self):
         logging.info("Starting LibreTranslate...")
 
-        # Enable cuda support, preserving existing environment variables
+        # Preserve ARGOS_DEVICE_TYPE environment variable
         env = os.environ.copy()
-        env["ARGOS_DEVICE_TYPE"] = "auto"
-
         self.libre_process = run_command(
             ["libretranslate"],
             error_message="Failed to start LibreTranslate",

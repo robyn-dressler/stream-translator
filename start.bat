@@ -1,13 +1,25 @@
-set extra="cpu"
-@echo off
+set extra=cpu
 where nvidia-smi >nul 2>&1
 if errorlevel 1 goto start
 
 nvidia-smi -L >nul 2>&1
 if errorlevel 1 goto start
 
-set extra="cuda"
+REM Checking if user opted into cuda in config
+for /F "tokens=*" %%g in ('python -c `"import config; print('cuda' if config.enable_cuda else 'cpu')"`) do (set extra=%%g)
+
+if %extra% == cpu goto start
+
+REM Checking if ctranslate2 can access cuda toolkit
+python -c "import ctranslate2; print(ctranslate2.get_supported_compute_types('cuda'))" >nul
+if errorlevel 1 goto download
+
+set "ARGOS_DEVICE_TYPE=cuda"
+goto start
+
+:download
+echo "To use CUDA for translation, download and install the 12.x version: https://developer.nvidia.com/cuda-toolkit-archive"
+exit /b 1
 
 :start
-@echo on
-uv sync --extra "%extra%" && uv run setup.py && uv run main.py --extra "%extra%"
+uv sync --extra %extra% && uv run --extra %extra% setup.py && uv run --extra %extra% main.py
