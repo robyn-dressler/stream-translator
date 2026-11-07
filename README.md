@@ -1,6 +1,6 @@
 # Stream Translator
 
-Stream Translator is a simple Python script that listens to English speech from your microphone, and generates captions in multiple languages. It writes captions in real time to text files for each language you choose to translate to, which can be used by [OBS text sources](https://obsproject.com/kb/text-sources) or an equivalent tool. Then, if you configure any languages to translate to, it will output those translations to their own text files. Optionally, you can set up a Twitch bot that translates non-English messages from chatters into English.
+Stream Translator is a simple Python script that listens to English speech from your microphone, and generates captions in multiple languages. It writes captions in real time to text files for each language you choose to translate to, which can be used by [OBS text sources](https://obsproject.com/kb/text-sources) or an equivalent tool. Optionally, you can set up a Twitch bot that translates non-English messages from chatters into English.
 
 ### OBS Example
 ![obs-captions.png](screenshots/obs-captions.png)
