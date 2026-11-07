@@ -8,6 +8,7 @@ from io import TextIOWrapper
 from langcodes import Language
 
 import config
+from util import overwrite_file
 from translation_client import TranslationClient
 
 
@@ -37,14 +38,14 @@ class TranslationFileWriter:
                 if request.en_file is None or request.translated_files is None:
                     return
 
-                TranslationFileWriter.overwrite_file(request.en_file, request.english_text)
+                overwrite_file(request.en_file, request.english_text)
                 logging.info(f"English phrase: {request.english_text}")
 
                 for code, file in request.translated_files.items():
                     translated_text = TranslationClient.translate(request.english_text, from_lang="en", to_lang=code)
                     lang = Language.get(code)
                     if translated_text is not None:
-                        TranslationFileWriter.overwrite_file(file, translated_text)
+                        overwrite_file(file, translated_text)
                         logging.info(f"{lang.language_name()} translation: {translated_text}")
 
             except:
@@ -58,13 +59,6 @@ class TranslationFileWriter:
     async def stop(self):
         await self._file_write_queue.put(TranslationFileWriter._poison)
 
-    @staticmethod
-    def overwrite_file(file: TextIOWrapper, text: str):
-        file.seek(0)
-        file.write(text)
-        file.truncate()
-        file.flush()
-
 class TranslationFileService:
     def __init__(self):
         self.writer: TranslationFileWriter | None = None
@@ -76,7 +70,7 @@ class TranslationFileService:
         self.en_file = open("english.txt", "w", encoding="utf-8")
 
         self.translated_files: dict[str, TextIOWrapper] = {}
-        for language in config.translate_to_languages:
+        for language in config.translate_to_languages or []:
             lang = Language.find(language)
             self.translated_files[lang.to_tag()] = open(f"{lang.language_name().lower()}.txt", "w", encoding="utf-8")
 

@@ -25,7 +25,7 @@ async def transcribe():
                     if not english_text:
                         continue
 
-                    await translation_file_service.process_text(english_text)
+                    await translation_file_service.process_text(english_text.strip())
 
                 except sr.UnknownValueError:
                     logging.error("Whisper could not understand audio")

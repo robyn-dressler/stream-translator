@@ -1,6 +1,6 @@
 import asyncio
 import logging
-from typing import override
+from typing import override, Mapping
 
 import twitchio
 from twitchio.eventsub import ChatMessageSubscription
@@ -9,14 +9,27 @@ from twitchio.ext.commands import Bot
 
 import config
 from translation_client import TranslationClient
-from util import get_authorized_users
+from util import get_authorized_users, get_twitch_id_map
 
 
 class TranslationBot(Bot):
+
+    def __init__(self, id_map: Mapping[str, str]):
+        super().__init__(
+            client_id=config.twitch_client_id,
+            client_secret=config.twitch_client_secret,
+            bot_id=id_map[config.twitch_bot_login],
+            owner_id=id_map[config.twitch_owner_login],
+            prefix=config.twitch_bot_prefix
+        )
+
+        self.id_map = id_map
+
     @override
     async def setup_hook(self):
         authorized_ids = get_authorized_users()
-        for broadcaster_id in config.twitch_broadcaster_ids:
+        broadcaster_ids = [ self.id_map[login] for login in config.twitch_broadcaster_logins if login in self.id_map ]
+        for broadcaster_id in broadcaster_ids:
             if broadcaster_id not in authorized_ids:
                 logging.warning(f"Broadcaster id '{broadcaster_id}' not authorized. Skipping.")
                 continue
@@ -24,7 +37,7 @@ class TranslationBot(Bot):
             await self.subscribe_websocket(
                 payload=ChatMessageSubscription(
                     broadcaster_user_id=broadcaster_id,
-                    user_id=config.twitch_bot_id
+                    user_id=self.bot_id
                 ),
                 as_bot=True
             )
@@ -60,15 +73,14 @@ class CommandComponent(commands.Component):
 async def start_bot():
     twitchio.utils.setup_logging(level=logging.INFO)
 
-    async with TranslationBot(
-        client_id=config.twitch_client_id,
-        client_secret=config.twitch_client_secret,
-        bot_id=config.twitch_bot_id,
-        owner_id=config.twitch_owner_id,
-        prefix=config.twitch_bot_prefix
-    ) as bot:
-        await bot.add_component(CommandComponent(bot))
-        await bot.start()
+    if config.twitch_client_id and config.twitch_client_secret and config.twitch_owner_login and config.twitch_bot_login\
+        and config.twitch_broadcaster_logins:
+
+        id_map = get_twitch_id_map()
+
+        async with TranslationBot(id_map) as bot:
+            await bot.add_component(CommandComponent(bot))
+            await bot.start()
 
 def main():
     asyncio.run(start_bot())

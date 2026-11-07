@@ -1,4 +1,5 @@
 import asyncio
+import json
 import webbrowser
 from asyncio import TaskGroup
 from pathlib import Path
@@ -12,7 +13,7 @@ from twitchio import Scopes, UserAuthorisation
 from twitchio.authentication import UserTokenPayload
 
 import config
-from util import get_authorized_users
+from util import get_authorized_users, overwrite_file
 
 
 class SetupTwitchClient(twitchio.Client):
@@ -69,10 +70,27 @@ class SetupService:
             self.browser.open_new(url)
             await self.twitch_client.wait_for_authorization(user_id)
 
+    async def get_user_ids(self, user_logins: list[str]) -> dict[str, str]:
+        users = await self.twitch_client.fetch_users(logins=user_logins)
+        return { user.name: user.id for user in users if user.name is not None }
+
     async def authorize_all_users(self):
         async def authorize():
             await self.twitch_client.wait_until_ready()
-            configured_ids = config.twitch_broadcaster_ids + [config.twitch_bot_id]
+
+            # Get list of all user ids
+            configured_logins = config.twitch_broadcaster_logins + [config.twitch_bot_login]
+            configured_id_map = await self.get_user_ids(configured_logins)
+            configured_ids = [ v for k,v in configured_id_map.items() ]
+
+            # Save user ID map
+            json_str = json.dumps(configured_id_map)
+            with open("twitch_ids.json", "w") as f:
+                overwrite_file(f, json_str)
+
+            broadcaster_ids = [ configured_id_map[login] for login in config.twitch_broadcaster_logins ]
+            twitch_bot_id = configured_id_map[config.twitch_bot_login]
+
             user_authorizations = await self.twitch_client.fetch_auth_by_users(configured_ids)
             user_authorization_map = {item.user.id: item for item in user_authorizations if item.user.id in self.authorized_ids}
 
@@ -84,7 +102,7 @@ class SetupService:
                 redirect_uri=self.twitch_client.redirect_uri
             ).url
 
-            await self.ensure_user_authorized(config.twitch_bot_id, bot_user_url, user_authorization_map, bot_scopes)
+            await self.ensure_user_authorized(twitch_bot_id, bot_user_url, user_authorization_map, bot_scopes)
 
             # Authorize bot to read and write in channels
             broadcaster_scopes = {"channel:bot"}
@@ -94,7 +112,7 @@ class SetupService:
                 redirect_uri=self.twitch_client.redirect_uri
             ).url
 
-            for broadcaster_id in config.twitch_broadcaster_ids:
+            for broadcaster_id in broadcaster_ids:
                 await self.ensure_user_authorized(broadcaster_id, broadcaster_url, user_authorization_map, broadcaster_scopes)
 
             await self.twitch_client.close()

@@ -10,11 +10,8 @@ for /F "tokens=* USEBACKQ" %%g in (`python -c "import config; print('cuda' if co
 
 if %extra% == cpu goto start
 
-REM Checking if ctranslate2 can access cuda toolkit
-uv run --extra %extra% python -c "import ctranslate2; print(ctranslate2.get_supported_compute_types('cuda'))" >nul 2>&1
-if errorlevel 1 goto download
-
-where cublas64_12.dll >nul 2>&1
+REM Checking if cuda toolkit is installed
+nvcc --version >nul 2>&1
 if errorlevel 1 goto download
 
 set "ARGOS_DEVICE_TYPE=cuda"
