@@ -6,12 +6,15 @@ nvidia-smi -L >nul 2>&1
 if errorlevel 1 goto start
 
 REM Checking if user opted into cuda in config
-for /F "tokens=*" %%g in ('python -c `"import config; print('cuda' if config.enable_cuda else 'cpu')"`) do (set extra=%%g)
+for /F "tokens=* USEBACKQ" %%g in (`python -c "import config; print('cuda' if config.enable_cuda else 'cpu')"`) do (set extra=%%g)
 
 if %extra% == cpu goto start
 
 REM Checking if ctranslate2 can access cuda toolkit
-python -c "import ctranslate2; print(ctranslate2.get_supported_compute_types('cuda'))" >nul
+uv run --extra %extra% python -c "import ctranslate2; print(ctranslate2.get_supported_compute_types('cuda'))" >nul 2>&1
+if errorlevel 1 goto download
+
+where cublas64_12.dll >nul 2>&1
 if errorlevel 1 goto download
 
 set "ARGOS_DEVICE_TYPE=cuda"
