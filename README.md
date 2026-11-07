@@ -5,13 +5,13 @@ Stream Translator is a simple Python script that listens to English speech from 
 ### OBS Example
 ![obs-captions.png](screenshots/obs-captions.png)
 
-### Twitch Bot Translation
+### Translation Twitch Bot Example
 ![translation-bot.png](screenshots/translation-bot.png)
 
 
 ### Intended Use
 
-This tool is meant to be a convenient all-in-one script you can run on your local streaming PC, and is not intended as a production scale application. Under the hood, this script runs a local LibreTranslate server for the translation API, and a Twitchio client to run the twitch bot. If you want a similar setup that sets up LibreTranslate and Twitchio as separate remote services, feel free to fork this repository and modify it for your use case.
+This tool is meant to be a convenient all-in-one script you can run on your streaming PC, and is not intended as a production scale application. Under the hood, this script runs a local LibreTranslate server for the translation API, and a Twitchio client to run the twitch bot. The speech recognition is done using a locally installed OpenAI Whisper model. If you want a similar setup that runs LibreTranslate, Twitchio, and/or OpenAI Whisper as separate remote services, feel free to fork this repository and modify it for your use case.
 
 ## Installation
 
@@ -26,7 +26,7 @@ git clone https://github.com/robyn-dressler/stream-translator.git
 ```
 
 ### Configuration
-All tool settings can be changed in the `config.py` file. See the table below for the list of available options. If using the Twitch translation bot, remember to configure the settings starting with `twitch_` (see [Setting Up Twitch](#setting-up-twitch)). 
+All tool settings can be managed in the `config.py` file. When you first clone the repo, copy `config.example.py` and rename it to `config.py` to create an empty configuration. See the table below for the list of available settings. If using the Twitch translation bot, remember to configure the settings starting with `twitch_` (see [Setting Up Twitch](#setting-up-twitch)). 
 
 |Setting   |Default   |Description   |
 |---|---|---|
@@ -48,6 +48,7 @@ All tool settings can be changed in the `config.py` file. See the table below fo
 5. Choose "Chat Bot" as the category
 6. Choose "Confidential" for the Client Type
 7. Click create, then generate a client secret and save it somewhere secure
+8. Make a new Twitch account to use as your bot, or use an existing one
 
 ## Running the Tool
 Open a terminal in the folder you downloaded stream-translator to and run the command corresponding to your OS:
